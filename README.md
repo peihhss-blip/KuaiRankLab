@@ -54,18 +54,24 @@ python -c "import torch; print(torch.__version__); print(torch.cuda.is_available
 
 本项目使用的 KuaiRand 数据集来自 CIKM 2022：
 
-> @inproceedings{gao2022kuairand,
->   title = {KuaiRand: An Unbiased Sequential Recommendation Dataset with Randomly Exposed Videos},
->   author = {Gao, Chongming and Li, Shijun and Zhang, Yuan and Chen, Jiawei and Li, Biao and Lei, Wenqiang and Jiang, Peng and He, Xiangnan},
->   url = {https://doi.org/10.1145/3511808.3557624},
->   doi = {10.1145/3511808.3557624},
->   booktitle = {Proceedings of the 31st ACM International Conference on Information and Knowledge Management},
->   series = {CIKM '22},
->   location = {Atlanta, GA, USA},
->   numpages = {5},
->   year = {2022},
->   pages = {3953–3957}
-> }
+## 📚 Citation
+
+本项目使用的 KuaiRand 数据集来自 CIKM 2022：
+
+```bibtex
+@inproceedings{gao2022kuairand,
+  title = {KuaiRand: An Unbiased Sequential Recommendation Dataset with Randomly Exposed Videos},
+  author = {Gao, Chongming and Li, Shijun and Zhang, Yuan and Chen, Jiawei and Li, Biao and Lei, Wenqiang and Jiang, Peng and He, Xiangnan},
+  url = {https://doi.org/10.1145/3511808.3557624},
+  doi = {10.1145/3511808.3557624},
+  booktitle = {Proceedings of the 31st ACM International Conference on Information and Knowledge Management},
+  series = {CIKM '22},
+  location = {Atlanta, GA, USA},
+  numpages = {5},
+  year = {2022},
+  pages = {3953–3957}
+}
+```
 
 当前主数据集为 **KuaiRand-1K**。这里的 “1K” 指 1,000 个用户，不代表只有 1,000 条交互或 1,000 个视频。
 
