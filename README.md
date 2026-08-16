@@ -2,7 +2,7 @@
 
 KuaiRankLab 是一个基于 **KuaiRand** 数据集的推荐排序学习项目，目标是从数据处理和 LR 基线开始，逐步实现并比较 DeepFM、DCN、DIN、MMoE 等常见推荐模型。
 
-当前主要研究内容包括：
+当前主要研究内容（计划）包括：
 
 - CTR / 用户反馈预测；
 - 稀疏特征与连续特征处理；
@@ -14,6 +14,8 @@ KuaiRankLab 是一个基于 **KuaiRand** 数据集的推荐排序学习项目，
 ## 开发设备与运行环境
 
 项目通过 GitHub 在两台设备之间同步和维护。两台设备承担不同职责：
+
+两台设备均包含一个conda创建的环境kuairanklab，包含一些必要的模块。
 
 | 设备 | 环境 | 主要职责 | 依赖文件 |
 |---|---|---|---|
@@ -48,50 +50,22 @@ python -c "import torch; print(torch.__version__); print(torch.cuda.is_available
 
 如果正式训练时 `torch.cuda.is_available()` 为 `False`，应直接停止并修复 CUDA/PyTorch 环境，避免全量任务意外退回 CPU。
 
-### 设备检测约定
-
-后续新增的训练和评估入口应支持：
-
-- `--device auto|cuda|mps|cpu`，默认使用 `auto`；
-- 自动选择顺序为 CUDA → MPS → CPU；
-- 启动时打印 PyTorch 版本、CUDA 是否可用和最终设备名称；
-- 全量模式支持 `--require-cuda`，没有 CUDA 时立即报错；
-- 冒烟模式支持小用户集合、小 batch、少量 epoch，并允许在 MPS/CPU 上运行。
-
-推荐的公共设备检测逻辑：
-
-```python
-import torch
-
-
-def resolve_device(device: str = "auto", require_cuda: bool = False) -> torch.device:
-    if device == "auto":
-        if torch.cuda.is_available():
-            resolved = torch.device("cuda")
-        elif torch.backends.mps.is_available():
-            resolved = torch.device("mps")
-        else:
-            resolved = torch.device("cpu")
-    else:
-        resolved = torch.device(device)
-
-    if resolved.type == "cuda" and not torch.cuda.is_available():
-        raise RuntimeError("CUDA was requested but is not available.")
-    if require_cuda and resolved.type != "cuda":
-        raise RuntimeError("Full training requires CUDA, but CUDA is not available.")
-
-    device_name = (
-        torch.cuda.get_device_name(0)
-        if resolved.type == "cuda"
-        else resolved.type.upper()
-    )
-    print(f"PyTorch: {torch.__version__}")
-    print(f"CUDA available: {torch.cuda.is_available()}")
-    print(f"Selected device: {resolved} ({device_name})")
-    return resolved
-```
-
 ## 数据集
+
+本项目使用的 KuaiRand 数据集来自 CIKM 2022：
+
+> @inproceedings{gao2022kuairand,
+>   title = {KuaiRand: An Unbiased Sequential Recommendation Dataset with Randomly Exposed Videos},
+>   author = {Gao, Chongming and Li, Shijun and Zhang, Yuan and Chen, Jiawei and Li, Biao and Lei, Wenqiang and Jiang, Peng and He, Xiangnan},
+>   url = {https://doi.org/10.1145/3511808.3557624},
+>   doi = {10.1145/3511808.3557624},
+>   booktitle = {Proceedings of the 31st ACM International Conference on Information and Knowledge Management},
+>   series = {CIKM '22},
+>   location = {Atlanta, GA, USA},
+>   numpages = {5},
+>   year = {2022},
+>   pages = {3953–3957}
+> }
 
 当前主数据集为 **KuaiRand-1K**。这里的 “1K” 指 1,000 个用户，不代表只有 1,000 条交互或 1,000 个视频。
 
@@ -117,8 +91,6 @@ github：https://github.com/chongminggao/KuaiRand
 ## 第一轮 EDA 总结
 
 完整分析代码见 [`notebooks/01_data_overview.ipynb`](notebooks/01_data_overview.ipynb)。Notebook 对大 CSV 使用分块读取，已在全部 6 个文件上验证核心统计逻辑。
-
-从原始数据、Parquet、Dataset/DataLoader 到模型训练评估的完整设计见 [`notes/README.md`](notes/README.md)。
 
 ### 文件规模
 
@@ -222,36 +194,45 @@ github：https://github.com/chongminggao/KuaiRand
 
 Standard Test 和 Random Test 的曝光分布、候选视频集合不同，应分别报告和解释，不直接比较两者绝对指标的高低。
 
-## 项目结构
+## 项目结构（初步，逐渐增加）
 
 ```text
 KuaiRankLab/
-├── notes/                      # 数据、训练与实验设计笔记
-├── notebooks/                  # EDA 和可视化
-│   └── 01_data_overview.ipynb
-├── scripts/
-│   ├── prepare_splits.py       # 固定协议 Parquet 切分
-│   └── train_lr.py             # 流式 LR 基线
-├── src/kuairanklab/
-│   ├── data/                   # 数据切分与预处理
-│   └── baselines/              # LR 等基线
-├── learning/                   # 小型模型实现与学习笔记（规划）
-├── experiments/                # 实验配置和记录（规划）
-├── results/                    # 指标和图表（规划）
-├── data/                       # 本地数据，不提交 Git
-├── requirements.txt            # WSL + RTX 5070 正式训练环境
-└── requirements-mac.txt        # MacBook Air 开发与冒烟测试环境
+│
+├── data/
+│   ├── raw/
+│   │   └── KuaiRand原始文件
+│   │
+│   └── processed/
+│       ├── train.parquet
+│       ├── val.parquet
+│       └── test.parquet
+├── src/
+│   ├── data/
+│   │   ├── preprocess.py
+│   │   ├── split.py
+│   │   └── dataset.py
+│   │
+│   ├── models/
+│   │   ├── deepfm.py
+│   │   └── din.py
+│   │
+│   ├── trainer.py
+│   └── metrics.py
+├── checkpoints/
+├── train.py
+├── requirements.txt
+├── README.md
+└── .gitignore
 ```
 
 ## 当前计划
 
 - [x] 数据目录与字段检查
 - [x] 第一轮全量 EDA Notebook
-- [x] 时间划分和数据使用方案
-- [x] 固定协议交互数据切分与 Parquet 转换
-- [x] LR baseline 代码与 Mac 冒烟测试
-- [ ] WSL 全量 LR baseline
-- [ ] 统一设备检测和运行配置
+- [ ] 时间划分和数据使用方案
+- [ ] 数据处理
+- [ ] LR
 - [ ] DeepFM
 - [ ] DCN
 - [ ] DIN
