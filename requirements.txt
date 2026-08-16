@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 anyio==4.14.2
 argon2-cffi==25.1.0
 argon2-cffi-bindings==25.1.0
@@ -132,3 +133,12 @@ webcolors==25.10.0
 webencodings==0.6.1
 websocket-client==1.9.0
 wheel==0.47.0
+=======
+## Common CPU data pipeline and LR baseline dependencies.
+## Install the CUDA-compatible PyTorch build separately in WSL before deep-model training.
+joblib==1.5.3
+numpy==2.5.2
+pandas==3.0.5
+pyarrow==19.0.0
+scikit-learn==1.9.0
+>>>>>>> aaebda7 (调整项目整体框架)
